@@ -8,12 +8,14 @@
 import jieba
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-from sklearn import preprocessing
-from sklearn.cluster import KMeans
+from sklearn import metrics, preprocessing
+from sklearn.cluster import DBSCAN, KMeans
 from sklearn.decomposition import PCA
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.manifold import TSNE
+from sklearn.preprocessing import StandardScaler
 
 
 def csv_preproc(ori_csv_dir, proc_csv_dir):
@@ -51,6 +53,12 @@ def csv_slice(proc_csv_dir, tar_csv_dir, start_year=1500, end_year=2019):
         tar_csv_dir     选取某年到某年的csv文件并输出的路径
         start_year      起始年份 默认1500
         end_year        末尾年份 默认为2019
+
+    返回值：
+        无
+
+    参考：
+        使用Pandas对数据进行筛选和排序 http://bluewhale.cc/2016-08-06/use-pandas-filter-and-sort.html
     """
     try:
         csv_data = pd.read_csv(proc_csv_dir)
@@ -235,24 +243,17 @@ def kmeans_vis(n_clusters, tfidf_weight, word, topn_features=5, decomposition='P
         decomposition_data = tsne.fit_transform(tfidf_weight)
     elif(decomposition=='PCA'):
         # 使用PCA对TF-IDF进行降维 降低至2维
-        pca = PCA(n_components=3)
+        pca = PCA(n_components=2)
         decomposition_data = pca.fit_transform(tfidf_weight)
-    # 将降维后的一对数据分别加入x和y列表中 形成坐标
-    x = []
-    y = []
-    for i in decomposition_data:
-        x.append(i[0])
-        y.append(i[1])
-    
     # 绘制
     fig = plt.figure(figsize=(10, 8))
     ax = plt.axes()
     # 画虚线方格
     plt.grid(ls='--')
-    # 用x表示某篇文章
-    plt.scatter(x, y, c=kmeans.labels_+1, marker="o", alpha=0.8)
+    # 用o表示某篇文章 坐标在拆分的数据中
+    plt.scatter(decomposition_data[:, 0], decomposition_data[:, 1], c=kmeans.labels_+1, marker="o", alpha=0.8)
     print(type(kmeans.labels_))
-    ax.set_title(u'Green Printing  K-means clustering K=7')
+    ax.set_title(u'Green Printing  K-means clustering')
     plt.colorbar()
     plt.show()
     plt.savefig('./sample.png', aspect=1)
@@ -290,6 +291,27 @@ def best_k(tfidf_weight):
     print("K-SSE figure ... ok!")
 
 
+def dbscan_vis(tfidf_weight, decomposition='PCA'):
+    """
+    尝试使用DBSCAN(基于密度的带有噪声的空间聚类法)来聚类
+    """
+    if(decomposition=='TSNE'):
+        # 使用TSNE对TF-IDF进行降维 降低至2维
+        tsne = TSNE(n_components=2, n_iter=2000, learning_rate=200)
+        decomposition_data = tsne.fit_transform(tfidf_weight)
+    elif(decomposition=='PCA'):
+        # 使用PCA对TF-IDF进行降维 降低至2维
+        pca = PCA(n_components=2)
+        decomposition_data = pca.fit_transform(tfidf_weight)
+    
+    X = StandardScaler().fit_transform(decomposition_data)
+    #print(type(X))
+    #X = np.concatenate([x, y], axis=0)
+    db = DBSCAN(eps=0.35, min_samples=10).fit_predict(X)
+    plt.scatter(X[:, 0], X[:, 1], c=db)
+    plt.show()
+    
+
 if __name__ == '__main__':
     # 这里应该使用一个demo文件 作为模块的测试用
     # 而真正的运行文件可以另外写一个py文件
@@ -301,14 +323,15 @@ if __name__ == '__main__':
     # 切分好的词语输出的路径
     corpus_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\corpus.txt"
     
+    '''
     # csv文件的预处理和加载
     ori_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\ex_text.csv'
     proc_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\proc_text.csv'
     #csv_preproc(ori_csv_dir, proc_csv_dir)
-    # 对csv选取某时间到某时间
-    tar_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\text2000-2009.csv'
-    #csv_slice(proc_csv_dir, tar_csv_dir, start_year=2000, end_year=2009)
-    
+    # 选取某时间到某时间
+    tar_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\fulltext.csv'
+    csv_slice(proc_csv_dir, tar_csv_dir)
+    '''
     
     #----------------------------------------------------------------------------#
     # 加载文件 仍然在修改中...
@@ -318,9 +341,8 @@ if __name__ == '__main__':
     #for year in range(2015, 2020):
         #text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\text"+ str(year) + ".txt"
         #print(text_dir)
-    text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\text2000-2009.csv"
+    text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\full_text.txt"
     #----------------------------------------------------------------------------#
-    
     # 加载文本
     corpus = text_load(userdict_dir, text_dir)
     # 停用词过滤
@@ -328,7 +350,8 @@ if __name__ == '__main__':
     # 获取tfidf值和所有关键词
     tfidf_weight, word = tfidf(corpus)
     # 绘制聚类结果图
-    kmeans_vis(4, tfidf_weight, word, decomposition='TSNE')
+    kmeans_vis(8, tfidf_weight, word, decomposition='TSNE')
     # 绘制K-SSE关系图
     #best_k(tfidf_weight)
-    
+    # 使用DBSCAN聚类
+    #dbscan_vis(tfidf_weight, 'PCA')
