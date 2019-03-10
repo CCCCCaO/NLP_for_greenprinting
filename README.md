@@ -16,8 +16,9 @@
 **cluster_analysis.py**|聚类主文件|Kmeans和可视化
 **corpus.txt**|过滤后的语料文件|用于检查
 **printing_dict.txt**|自定义词典|额外添加印刷相关术语 UTF-8格式
-**K-SSE.png**|K和SSE关系图|用于手肘法确定最佳K值
-**text.txt** |原始文本|必须为UTF-8格式
+**sliced_text**|按时间切分的文本|用于分析发展情况
+**full_text.txt** |全文本|必须为UTF-8格式
+**ex_text.csv** |补充的相关文本数据|添加时间，标题，关键词，文本多个信息
 
 ---
 CCCCaO 2019.3
