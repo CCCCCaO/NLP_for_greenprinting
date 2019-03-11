@@ -22,10 +22,15 @@ def csv_preproc(ori_csv_dir, proc_csv_dir):
     """
     csv_preproc函数 用于对csv文件进行预处理操作：去除重复行，并按年份时间升序排列
     并将处理后的csv文件输出，可以用于检查
+    csv文件的格式为：首行是列索引Date,Title,Keywords,Abstract
+    每一行分别为一片文章的发表日期，标题，关键词，摘要或全文
 
     参数：
         ori_csv_dir     原始csv文件的路径
         proc_csv_dir    输出处理后的csv文件的路径
+    
+    返回值：
+        无
     """
     try:
         csv_data = pd.read_csv(ori_csv_dir)
@@ -95,7 +100,7 @@ def text_load(userdict_dir, text_dir):
     else:
         print("Sucessfully load the Userdict...")
         # 定义一个匿名函数segment_jieba 输入text文本 用空格作为分隔符来分隔切分好的文本
-        segment_jieba = lambda text:" ".join(jieba.cut(text))
+        segment_jieba = lambda text:" ".join(jieba.cut(text, cut_all=False))
         corpus_ori = []
         try:
             # 以utf-8编码打开待处理文本 txt或csv都可以
@@ -112,9 +117,9 @@ def text_load(userdict_dir, text_dir):
     return corpus_ori
 
 
-def word_filt(stopwords_dir, corpus_dir, corpus_ori):
+def words_filt(stopwords_dir, corpus_dir, corpus_ori):
     """
-    word_filt函数：用于过滤停用词
+    words_filt函数：用于过滤停用词
     读取停用词表文件 遍历切分好的语料 去除停用词表中出现的词
     返回过滤后的语料 并且将其输出至uft-8编码的txt文件用于检查
 
@@ -217,9 +222,9 @@ def kmeans_vis(n_clusters, tfidf_weight, word, topn_features=5, decomposition='P
         主成分分析PCA降维的运用实战 https://blog.csdn.net/brucewong0516/article/details/78666763
         流形学习-高维数据的降维与可视化 https://blog.csdn.net/u012162613/article/details/45920827    
     """
+
     kmeans = KMeans(n_clusters)
     kmeans.fit(tfidf_weight)
-
     # 打印簇的中心坐标
     #print(kmeans.cluster_centers_)
     # 将文章索引 和 其类标签输出至控制台
@@ -323,15 +328,15 @@ if __name__ == '__main__':
     # 切分好的词语输出的路径
     corpus_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\corpus.txt"
     
-    '''
+    
     # csv文件的预处理和加载
     ori_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\ex_text.csv'
     proc_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\proc_text.csv'
-    #csv_preproc(ori_csv_dir, proc_csv_dir)
+    csv_preproc(ori_csv_dir, proc_csv_dir)
     # 选取某时间到某时间
-    tar_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\fulltext.csv'
-    csv_slice(proc_csv_dir, tar_csv_dir)
-    '''
+    #tar_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\fulltext.csv'
+    #csv_slice(proc_csv_dir, tar_csv_dir)
+    
     
     #----------------------------------------------------------------------------#
     # 加载文件 仍然在修改中...
@@ -346,11 +351,11 @@ if __name__ == '__main__':
     # 加载文本
     corpus = text_load(userdict_dir, text_dir)
     # 停用词过滤
-    corpus1 = word_filt(stopwords_dir, corpus_dir, corpus)
+    corpus1 = words_filt(stopwords_dir, corpus_dir, corpus)
     # 获取tfidf值和所有关键词
     tfidf_weight, word = tfidf(corpus)
     # 绘制聚类结果图
-    kmeans_vis(8, tfidf_weight, word, decomposition='TSNE')
+    #kmeans_vis(8, tfidf_weight, word, decomposition='TSNE')
     # 绘制K-SSE关系图
     #best_k(tfidf_weight)
     # 使用DBSCAN聚类
