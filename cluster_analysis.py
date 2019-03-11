@@ -100,7 +100,7 @@ def text_load(userdict_dir, text_dir):
     else:
         print("Sucessfully load the Userdict...")
         # 定义一个匿名函数segment_jieba 输入text文本 用空格作为分隔符来分隔切分好的文本
-        segment_jieba = lambda text:" ".join(jieba.cut(text, cut_all=False))
+        segment_jieba = lambda text:" ".join(jieba.cut(text))
         corpus_ori = []
         try:
             # 以utf-8编码打开待处理文本 txt或csv都可以
@@ -244,7 +244,7 @@ def kmeans_vis(n_clusters, tfidf_weight, word, topn_features=5, decomposition='P
     # 降维选择
     if(decomposition=='TSNE'):
         # 使用TSNE对TF-IDF进行降维 降低至2维
-        tsne = TSNE(n_components=2, n_iter=1600, learning_rate=100)
+        tsne = TSNE(n_components=2, n_iter=1800, learning_rate=150)
         decomposition_data = tsne.fit_transform(tfidf_weight)
     elif(decomposition=='PCA'):
         # 使用PCA对TF-IDF进行降维 降低至2维
@@ -256,7 +256,7 @@ def kmeans_vis(n_clusters, tfidf_weight, word, topn_features=5, decomposition='P
     # 画虚线方格
     plt.grid(ls='--')
     # 用o表示某篇文章 坐标在拆分的数据中
-    plt.scatter(decomposition_data[:, 0], decomposition_data[:, 1], c=kmeans.labels_+1, marker="o", alpha=0.8)
+    plt.scatter(decomposition_data[:, 0], decomposition_data[:, 1], c=kmeans.labels_+1, marker="o", alpha=0.85)
     print(type(kmeans.labels_))
     ax.set_title(u'Green Printing  K-means clustering')
     plt.colorbar()
@@ -328,7 +328,7 @@ if __name__ == '__main__':
     # 切分好的词语输出的路径
     corpus_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\corpus.txt"
     
-    
+    '''
     # csv文件的预处理和加载
     ori_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\ex_text.csv'
     proc_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\proc_text.csv'
@@ -337,7 +337,7 @@ if __name__ == '__main__':
     #tar_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\fulltext.csv'
     #csv_slice(proc_csv_dir, tar_csv_dir)
     
-    
+    '''
     #----------------------------------------------------------------------------#
     # 加载文件 仍然在修改中...
     # 全文分析
@@ -346,17 +346,18 @@ if __name__ == '__main__':
     #for year in range(2015, 2020):
         #text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\text"+ str(year) + ".txt"
         #print(text_dir)
-    text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\full_text.txt"
+    text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\proc_text.csv"
     #----------------------------------------------------------------------------#
     # 加载文本
     corpus = text_load(userdict_dir, text_dir)
     # 停用词过滤
     corpus1 = words_filt(stopwords_dir, corpus_dir, corpus)
     # 获取tfidf值和所有关键词
-    tfidf_weight, word = tfidf(corpus)
+    tfidf_weight, word = tfidf(corpus1)
     # 绘制聚类结果图
-    #kmeans_vis(8, tfidf_weight, word, decomposition='TSNE')
+    #kmeans_vis(7, tfidf_weight, word, decomposition='PCA')
     # 绘制K-SSE关系图
-    #best_k(tfidf_weight)
+    best_k(tfidf_weight)
     # 使用DBSCAN聚类
     #dbscan_vis(tfidf_weight, 'PCA')
+    
