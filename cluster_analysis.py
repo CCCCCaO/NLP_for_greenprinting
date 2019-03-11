@@ -332,10 +332,11 @@ if __name__ == '__main__':
     # csv文件的预处理和加载
     ori_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\ex_text.csv'
     proc_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\proc_text.csv'
-    csv_preproc(ori_csv_dir, proc_csv_dir)
+    #csv_preproc(ori_csv_dir, proc_csv_dir)
+    
     # 选取某时间到某时间
-    #tar_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\fulltext.csv'
-    #csv_slice(proc_csv_dir, tar_csv_dir)
+    tar_csv_dir = 'C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\text2010_2014.csv'
+    csv_slice(proc_csv_dir, tar_csv_dir, 2010, 2014)
     
     '''
     #----------------------------------------------------------------------------#
@@ -346,7 +347,7 @@ if __name__ == '__main__':
     #for year in range(2015, 2020):
         #text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\text"+ str(year) + ".txt"
         #print(text_dir)
-    text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\proc_text.csv"
+    text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\text2000_2009.csv"
     #----------------------------------------------------------------------------#
     # 加载文本
     corpus = text_load(userdict_dir, text_dir)
@@ -355,9 +356,10 @@ if __name__ == '__main__':
     # 获取tfidf值和所有关键词
     tfidf_weight, word = tfidf(corpus1)
     # 绘制聚类结果图
-    kmeans_vis(7, tfidf_weight, word, decomposition='TSNE')
+    kmeans_vis(4, tfidf_weight, word, decomposition='TSNE')
     # 绘制K-SSE关系图
     #best_k(tfidf_weight)
     # 使用DBSCAN聚类
     #dbscan_vis(tfidf_weight, 'PCA')
+    
     
