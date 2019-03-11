@@ -3075,3 +3075,7 @@ to
 0015mgm3
 00
 00500059mgm3
+Date
+Keywords
+Abstract
+Title
