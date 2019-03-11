@@ -39,7 +39,7 @@ def csv_preproc(ori_csv_dir, proc_csv_dir):
     else:
         print("原始数据尺寸为：{}".format(csv_data.shape))
         # 在原地去重
-        csv_data.drop_duplicates(inplace=True)
+        csv_data.drop_duplicates(subset=['Abstract'], inplace=True)
         print("去重后数据尺寸为：{}".format(csv_data.shape))
         # 按照年份排序
         csv_data_distinct_ordered = csv_data.sort_values(by='Date')
