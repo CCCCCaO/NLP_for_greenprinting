@@ -355,9 +355,9 @@ if __name__ == '__main__':
     # 获取tfidf值和所有关键词
     tfidf_weight, word = tfidf(corpus1)
     # 绘制聚类结果图
-    #kmeans_vis(7, tfidf_weight, word, decomposition='PCA')
+    kmeans_vis(7, tfidf_weight, word, decomposition='TSNE')
     # 绘制K-SSE关系图
-    best_k(tfidf_weight)
+    #best_k(tfidf_weight)
     # 使用DBSCAN聚类
     #dbscan_vis(tfidf_weight, 'PCA')
     
