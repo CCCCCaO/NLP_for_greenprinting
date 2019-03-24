@@ -263,7 +263,6 @@ def kmeans_vis(n_clusters, tfidf_weight, word, topn_features=5, decomposition='P
     ax.set_title(u'Green Printing  K-means clustering')
     plt.colorbar()
     plt.show()
-    print(type(kmeans.labels_))
     
     
 def best_k(tfidf_weight):
