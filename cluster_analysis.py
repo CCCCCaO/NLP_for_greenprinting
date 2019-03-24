@@ -101,14 +101,11 @@ def text_load(userdict_dir, text_dir):
         print("Sucessfully load the Userdict...")
         # 定义一个匿名函数segment_jieba 输入text文本 用空格作为分隔符来分隔切分好的文本
         segment_jieba = lambda text:" ".join(jieba.cut(text))
-        corpus_ori = []
         try:
             # 以utf-8编码打开待处理文本 txt或csv都可以
             with open(text_dir, 'r', encoding='utf-8') as f:
                 # 文本格式是每一行一篇关键词+文章 如果文本格式改变的话 修改这部分即可！
-                for line in f:
-                    if line != ' ':
-                        corpus_ori.append(segment_jieba(line.strip()))
+                corpus_ori = [segment_jieba(line.strip()) for line in f if line != ' ']
         except IOError:
             print("Text File Input Error!!!")
         else:
