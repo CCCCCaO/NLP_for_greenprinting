@@ -8,6 +8,10 @@
 import jieba
 import matplotlib
 import matplotlib.pyplot as plt
+import plotly
+import plotly.plotly as py
+import plotly.graph_objs as go
+import collections
 import numpy as np
 import pandas as pd
 from sklearn import metrics, preprocessing
@@ -224,9 +228,14 @@ def kmeans_vis(n_clusters, tfidf_weight, word, topn_features=5, decomposition='P
     kmeans.fit(tfidf_weight)
     # 打印簇的中心坐标
     #print(kmeans.cluster_centers_)
+    label_all = []
     # 将文章索引 和 其类标签输出至控制台
     for index, label in enumerate(kmeans.labels_, 1):
+        label_all.append(label)
         print("index: {}, label: {}".format(index, label))
+    b = collections.Counter(label_all)
+    for c in b:
+        print(c, b[c]/len(b))
     # 打印inertia 
     print("inertia:{}".format(kmeans.inertia_))
     # 打印关键特征词
@@ -241,7 +250,7 @@ def kmeans_vis(n_clusters, tfidf_weight, word, topn_features=5, decomposition='P
     # 降维选择
     if(decomposition=='TSNE'):
         # 使用TSNE对TF-IDF进行降维 降低至2维
-        tsne = TSNE(n_components=2, n_iter=1800, learning_rate=150)
+        tsne = TSNE(n_components=2, n_iter=2000, learning_rate=150)
         decomposition_data = tsne.fit_transform(tfidf_weight)
     elif(decomposition=='PCA'):
         # 使用PCA对TF-IDF进行降维 降低至2维
@@ -250,6 +259,7 @@ def kmeans_vis(n_clusters, tfidf_weight, word, topn_features=5, decomposition='P
     
     X = StandardScaler().fit_transform(decomposition_data)
     # 绘制
+    '''
     fig = plt.figure(figsize=(10, 8))
     ax = plt.axes()
     # 画虚线方格
@@ -260,6 +270,29 @@ def kmeans_vis(n_clusters, tfidf_weight, word, topn_features=5, decomposition='P
     ax.set_title(u'Green Printing  K-means clustering')
     plt.colorbar()
     plt.show()
+    '''
+    text = [index for index, label in enumerate(kmeans.labels_, 1)]   
+    trace = [go.Scatter(
+        x=X[:, 0], 
+        y=X[:, 1],
+        text=text,
+        textposition='bottom center', 
+        marker=dict(
+            symbol="circle",
+            size = 10,
+            color=kmeans.labels_,
+            opacity=0.6,
+            colorscale='Jet',
+            showscale=True
+        ),
+        mode='markers'
+    )]
+    layout = go.Layout(
+    title='K-Means for Articles of Green Printing k = ' + str(n_clusters) + ' ' + str(decomposition)
+    ) 
+    fig = go.Figure(data=trace, layout=layout)
+    
+    plotly.offline.plot(fig, filename='scatter.html')
     
     
 def best_k(tfidf_weight):
@@ -272,24 +305,33 @@ def best_k(tfidf_weight):
     如果绘制一个k和SSE的关系图时，会形成一个手肘的形状，这个肘部对应的k值是最好的k值
     参考：
         K-means聚类最优k值的选取 https://blog.csdn.net/qq_15738501/article/details/79036255
-
+        Plotly Line Charts in Python https://plot.ly/python/line-charts/
     参数：
         tfidf_weight    tfidf值的矩阵
     
     返回值：
         K-SSE图像
     """
-    SSE = []
-    for k in range(1,10):
-        estimator = KMeans(n_clusters=k)
-        estimator.fit(tfidf_weight)
-        SSE.append(estimator.inertia_)
+    SSE = [KMeans(n_clusters=k).fit(tfidf_weight).inertia_ for k in range(1,10)]
     # 绘图
-    X = range(1, 10)
+    X = [k for k in range(1, 10)]
+    '''
     plt.xlabel('K')
     plt.ylabel('SSE(Sum of the Squared Errors)')
     plt.plot(X, SSE, 'o-')
     plt.show()
+    '''
+    trace = [go.Scatter(
+        x = X,
+        y = SSE,
+        mode = 'lines+markers',
+        name = 'K-SSE'
+    )]
+    layout = go.Layout(
+    title='K-SSE for Patents of Green Printing'
+    ) 
+    fig = go.Figure(data=trace, layout=layout)
+    plotly.offline.plot(fig, filename='K-SSE.html')
     print("K-SSE figure ... ok!")
 
 
@@ -299,7 +341,7 @@ def dbscan_vis(tfidf_weight, decomposition='PCA'):
     """
     if(decomposition=='TSNE'):
         # 使用TSNE对TF-IDF进行降维 降低至2维
-        tsne = TSNE(n_components=2, n_iter=2000, learning_rate=200)
+        tsne = TSNE(n_components=2, n_iter=2000, learning_rate=100)
         decomposition_data = tsne.fit_transform(tfidf_weight)
     elif(decomposition=='PCA'):
         # 使用PCA对TF-IDF进行降维 降低至2维
@@ -323,7 +365,7 @@ if __name__ == '__main__':
     # 停用词表路径 在搜集自网络的停用词表基础上 根据实际结果 额外添加了许多人名与地名
     stopwords_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\chineseStopWords.txt"
     # 切分好的词语输出的路径
-    corpus_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\corpus_patent.txt"
+    corpus_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\corpus.txt"
     
     '''
     # csv文件的预处理和加载
@@ -344,7 +386,7 @@ if __name__ == '__main__':
     #for year in range(2015, 2020):
         #text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\sliced_text\\text"+ str(year) + ".txt"
         #print(text_dir)
-    text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\patent.txt"
+    text_dir = "C:\\Users\\82460\\Documents\\GitHub\\green_printing\\full_text.txt"
     #----------------------------------------------------------------------------#
     # 加载文本
     corpus = text_load(userdict_dir, text_dir)
@@ -353,7 +395,7 @@ if __name__ == '__main__':
     # 获取tfidf值和所有关键词
     tfidf_weight, word = tfidf(corpus1)
     # 绘制聚类结果图
-    kmeans_vis(3, tfidf_weight, word, decomposition='PCA')
+    kmeans_vis(7, tfidf_weight, word, decomposition='TSNE')
     # 绘制K-SSE关系图
     #best_k(tfidf_weight)
     # 使用DBSCAN聚类
